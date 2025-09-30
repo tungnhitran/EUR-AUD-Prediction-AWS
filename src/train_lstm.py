@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import argparse
+import joblib
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -16,6 +17,7 @@ args = parse_args()
 # Load preprocessed data
 X = np.load(os.path.join(os.environ.get('SM_CHANNEL_TRAIN', 'data/'), 'X.npy'))
 y = np.load(os.path.join(os.environ.get('SM_CHANNEL_TRAIN', 'data/'), 'y.npy'))
+#scaler = joblib.load(os.path.join(args.data_dir, 'scaler.pkl'))
 
 # Define LSTM model
 model = tf.keras.Sequential([
@@ -28,5 +30,8 @@ model.summary()
 
 # Train the model
 model.fit(X, y, epochs=args.epochs, batch_size=args.batch_size, validation_split=0.2)
-model.save(os.environ['SM_MODEL_DIR'] + '/1')
-print("Model training complete and saved.")
+# Save the model
+export_dir = os.path.join(args.model_dir, '1')
+#model.export(export_dir)  # Use export() for SavedModel format
+model.save(export_dir)  # Use save() for SavedModel format
+print(f"Model exported to {export_dir}")

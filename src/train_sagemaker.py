@@ -4,7 +4,8 @@ import os
 import boto3
 
 session = sagemaker.Session()
-role = 'arn:aws:iam::427684478694:role/SageMakerRole'  # your SageMaker role ARN
+role = 'arn:aws:iam::427684478694:role/SageMakerRole'
+bucket = 'eur-aud-bucket'
 
 # Define Tensorflow estimator for LSTM
 estimator = TensorFlow(entry_point='src/train_lstm.py',
@@ -18,7 +19,11 @@ estimator = TensorFlow(entry_point='src/train_lstm.py',
                             'epochs': 50,
                             'batch_size': 32,
                             'learning_rate': 0.001
-                        })
+                        },
+                        output_path='s3://eur-aud-bucket/output/',
+                        sagemaker_session=session
+                        )
 
 # Train the model
 estimator.fit({'train': 's3://eur-aud-bucket/data/'})
+print("Training job started.")
